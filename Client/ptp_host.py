@@ -1,5 +1,6 @@
 import tkinter as tk
 from tkinter import ttk
+from ftp_client import *
 
 # def search(keyword):
 
