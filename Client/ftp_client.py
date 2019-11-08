@@ -81,7 +81,7 @@ def stor(command, sock):
 def listCMD(command):
     setupSocket(command)
 
-def connect(ip, port, name):
+def connect(ip, port):
     try:
         sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         sock.connect((ip,port))

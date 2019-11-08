@@ -4,6 +4,16 @@ from ftp_client import *
 
 # def search(keyword):
 
+def connect_to_server(ip, port, name, hostname, conn_speed):
+    socket = connect(ip, port)
+    if socket != 505:
+        message = "CONNECT " + name + " " + hostname + " " + conn_speed
+        socket.send(message.encode('utf-8'))
+        ack = socket.recv(1024).decode('utf-8')
+        if ack == "CONNECT ACK":
+            # append username to filelist name here
+            stor("STOR filelist.xml", socket)
+
 root = tk.Tk()
 root.title("GV-NAPSTER Host")
 
@@ -34,7 +44,9 @@ speeds.config(width = 20)
 speeds.grid(row = 1, column = 5)
 
 # insert command argument when able
-connect_button = tk.Button(connect_frame, text = "Connect")
+connect_button = tk.Button(connect_frame, text = "Connect", \
+        command = connect_to_server(server_field.get(), port_field.get() \
+        name_field.get(), hostname_field.get(), tkvar.get()))
 connect_button.grid(row = 0, column = 4)
 
 
