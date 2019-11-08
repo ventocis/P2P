@@ -85,7 +85,6 @@ def connect(ip, port, name):
     try:
         sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         sock.connect((ip,port))
-        stor("STOR filelist.xml", sock)
         return sock
     except:
         return 505
