@@ -8,7 +8,7 @@ from os import listdir, path
 IP = '127.0.0.1'
 PORT = 12000
 userDict = {}
-fileDict = {}
+fileList = []
 
 class Client(threading.Thread):
     def __init__(self, s, addr):
@@ -38,7 +38,7 @@ class Client(threading.Thread):
             #wait for user to send a keyword search
     def connect(self, command):
         try:
-            s = socket.socekt(socket.AF_INET, socket.SOCK_STREAM)
+            s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
             self.storeUsers(self.port, command[1], command[2], command[3])
             s.connect((IP, self.port))
             s.send("ACK CONNECT".encode('utf-8'))
@@ -77,7 +77,6 @@ class Client(threading.Thread):
                 descr = child[1].text
                 self.storeFiles(userName, name, descr)
             print("Successfully parsed XML file")
-            print(fileDict)
             os.remove(fileName)
         else:
             print("Parse Failed")
@@ -92,16 +91,19 @@ class Client(threading.Thread):
         userInfo = [hostName, portNumber, connSpeed]
         userDict[username] = userInfo
 
-    def storeFiles(self, username, fileName, description):
-        fileInfo = [fileName, description]
-        fileDict[username] = fileInfo
+    def storeFiles(self, userName, fileName, description):
+        fileInfo = [userName, fileName, description]
+        fileList.append(fileInfo)
         
     def deleteUser(self, username):
-        del fileDict[username]
-        del userDict[username]
+        for file in fileList:
+            if file[0] == username:
+                fileList.remove(file)
+        userDict.pop(username, None)
 
     def search(self, srchString, userName):
-        print("In search")
+        for file in fileList:
+            print("In search")
 serv = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 serv.bind((IP, PORT))
 serv.listen(1)
