@@ -48,11 +48,11 @@ while True:
    comm = input("\nINPUT COMMAND: ")
    tokens = comm.split()
    if tokens[0] == "RETR" and len(tokens) == 2:
-       ftp_client.retr(comm, 2)
+       ftp_client.retr(comm, sock)
    elif tokens[0] == "STOR" and len(tokens) == 2:
-       ftp_client.stor(comm, 2)
+       ftp_client.stor(comm, sock)
    elif tokens[0] == "LIST" and len(tokens) == 1:
-       ftp_client.listCMD(comm)
+       ftp_client.listCMD(comm, sock)
    elif tokens[0] == "QUIT" and len(tokens) == 1:
        sock.send(comm.encode('utf-8'))
        print("CLOSING CONNECTION TO SERVER...GOODBYE")
