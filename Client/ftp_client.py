@@ -81,16 +81,25 @@ def setupSocket(command):
     global PORT
     global COUNT
     global serv
+    # Change the port so that we open the socket on a new port
     PORT = PORT + 2 * COUNT
     command = command + " " + str(PORT)
+
+    # Create a socket to handl the data connection
     serv = socketserver.TCPServer(('127.0.0.1', PORT), FileListener)
     print(sock)
+
+    #send a message to say that we have opened the data connection socket & include the port number
     sock.send(command.encode('utf-8'))
+
+    #wait for the reply from the server on the data socket
     serv.handle_request()
 
 def sendCommand(command):
+    #send a command w the command socket
     sock.send(command.encode('utf-8'))
-    print(serv)
+    
+    #wait for the reply from the server on the data socket
     serv.handle_request()
     print("After handle request")
 
