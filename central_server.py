@@ -18,9 +18,12 @@ class Client(threading.Thread):
         super(Client, self).__init__()
 
     def run(self):
-        while(True):
+        while (True):
+            print("received command")
             command = self.request.recv(1024).decode('utf-8').split()
+            print(command)
             if command[0] == "CONNECT":
+                print("Called connect")
                 self.connect(command)
                 return
                     
@@ -39,9 +42,11 @@ class Client(threading.Thread):
     def connect(self, command):
         try:
             s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-            self.storeUsers(self.port, command[1], command[2], command[3])
-            s.connect((IP, self.port))
+            port = int(command[4])
+            self.storeUsers(command[1], command[2], port, command[3])
+            s.connect((IP, port))
             s.send("ACK CONNECT".encode('utf-8'))
+            print("sent ack")
             while(True):
                 if command[0] == "QUIT":
                     self.quit(command[1])

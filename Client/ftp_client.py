@@ -10,6 +10,7 @@ COUNT = 1
 
 class FileListener(socketserver.BaseRequestHandler):
     def retr(self, command):
+        print("called this 2")
         if command[1] == "200":
             #myPath = '/Users/samventocilla/Code/cis457DataComm/Proj1/CIS457Proj1/Client/'
             fileName = command[2]
@@ -45,30 +46,35 @@ class FileListener(socketserver.BaseRequestHandler):
                 if x != "LIST":
                     print("\t" + x)
 
-    def handle(self):     
-        command = self.request.recv(1024).decode('utf-8').split()
+    def handle(self, expectedAck):
+        print("In handle")    
+        recvStr = self.request.recv(1024).decode('utf-8')
+        command = recvStr.split()
         if command[0] == "RETR":
             self.retr(command)
         elif command[0] == "STOR":
             self.stor(command)
         elif command[0] == "LIST":
             self.list(command)
+        elif recvStr == expectedAck:
+            print("Received Correct ACK: " + expectedAck)
         else:
             print("Skipped it")
         return 
 
-def setupSocket(command, sock):
+def setupSocket(command, sock, expectedAck):
     global PORT
     global COUNT
     PORT = PORT + 2 * COUNT
-    command = str(PORT) + " " + command
+    command = command + " " + str(PORT)
     serv = socketserver.TCPServer(('127.0.0.1', PORT), FileListener)
     sock.send(command.encode('utf-8'))
     print("got to handle request")
     serv.handle_request()
 
 def retr(command, sock):
-    setupSocket(command, sock)
+    print("called this 1")
+    setupSocket(command, sock, "CONNECT 200")
 
 def stor(command, sock):
     tokens = command.split()
@@ -80,7 +86,7 @@ def stor(command, sock):
         print("File Not Found")
 
 def listCMD(command, sock):
-    setupSocket(command, sock)
+    setupSocket(command, sock, "ACK CONNECT")
 
 def connect(ip, port, name):
     try:

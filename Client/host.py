@@ -20,6 +20,7 @@ print()
 ip = None
 port = None
 sock = None
+# Initial Connection to the concurrent server
 while True:
     comm = input("INPUT COMMAND: ")
     tokens = comm.split()
@@ -44,10 +45,24 @@ while True:
         print("MUST CONNECT BEFORE USING OTHER COMMANDS")
         continue
 
+    #CONNECT Username Hostname ConnectionSpeed portNumber
+    #Send ACK command name
+    #FILEDESC FileName Username
+    #SEARCH DESCR Username
+    #LOCATION XMLFile
+    #QUIT Username
+    #ACK is ACK CONNECT
+    #wait for client to send username, hostname, and connection speed
+    #store username, hostname, and connection speed in a table/list
+    #send acknowledgement back to client
+    #wait for client to send xml file with shared file descriptions
+    #parse xml file and store descriptions in a table/list
+    #wait for user to send a keyword search
+
 while True:
    comm = input("\nINPUT COMMAND: ")
    tokens = comm.split()
-   if tokens[0] == "RETR" and len(tokens) == 2:
+   if tokens[0] == "CONNECT" and len(tokens) == 4:
        ftp_client.retr(comm, sock)
    elif tokens[0] == "STOR" and len(tokens) == 2:
        ftp_client.stor(comm, sock)
