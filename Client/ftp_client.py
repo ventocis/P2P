@@ -46,7 +46,7 @@ class FileListener(socketserver.BaseRequestHandler):
                     print("\t" + x)
 
     def fileDesc(self, command):        
-        fileName = command[1].strip()
+        fileName = command[2].strip()
         with open(fileName, 'r') as fs:
             for line in fs:
                 self.request.send(line.encode('utf-8'))
@@ -57,8 +57,10 @@ class FileListener(socketserver.BaseRequestHandler):
     def handle(self):
         print("In handle")    
         recvStr = self.request.recv(1024).decode('utf-8')
+        print(recvStr)
         command = recvStr.split()
-        if recvStr == "ACK FILEDESC":
+        print("Command "+ str(command))
+        if command[0] == "ACK" and command[1] == "FILEDESC":
             self.fileDesc(command)
         elif command[0] == "STOR":
             print("stor")
@@ -72,16 +74,13 @@ class FileListener(socketserver.BaseRequestHandler):
             print("Skipped it")
         return 
 
-ip = None
-port = None
-
 def setupSocket(command):
     global PORT
     global serv
     # Change the port so that we open the socket on a new port
     PORT = PORT + 2
     print(str(PORT))
-    PORT = PORT + 2 * COUNT
+    PORT = PORT + 2 
     command = command + " " + str(PORT)
 
     # Create a socket to handle the data connection

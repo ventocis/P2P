@@ -19,13 +19,28 @@ class Client(threading.Thread):
 
     def run(self):
         while (True):
-            print("received command")
-            command = self.request.recv(1024).decode('utf-8').split()
-            print(command)
-            if command[0] == "CONNECT":
-                print("Called connect")
-                self.connect(command)
-                return
+            try:
+                command = self.request.recv(1024).decode('utf-8').split()
+                port = int(command[len(command) - 1])
+                if command[0] == "QUIT":
+                    self.quit(command[1])
+                    return
+                s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+                s.connect((IP, port))
+                if command[0] == "CONNECT":
+                    self.storeUsers(command[1], command[2], port, command[3])
+                    print("in connected")
+                    s.send("ACK CONNECT".encode('utf-8'))
+                elif command[0] == "FILEDESC":
+                    fileName = command[1]
+                    s.send(("ACK FILEDESC " + fileName).encode('utf-8'))
+                    print("afteer ack")
+                    self.stor(s, command[1])
+                    self.parseXML(s, command[1], command[2])
+                elif command[0] == "SEARCH":
+                    self.search(command[1], command[2], s)
+            except socket.error as exc:
+                print("Connection error: " + str(exc))
                     
             #CONNECT Username Hostname ConnectionSpeed
             #Send ACK command name
@@ -39,33 +54,8 @@ class Client(threading.Thread):
             #wait for client to send xml file with shared file descriptions
             #parse xml file and store descriptions in a table/list
             #wait for user to send a keyword search
-    def connect(self, command):
-        try:
-            port = int(command[4])
-            self.storeUsers(command[1], command[2], port, command[3])
-            while(True):
-                command = self.request.recv(1024).decode('utf-8').split()
-                if command[0] == "QUIT":
-                    self.quit(command[1])
-                    return
-                s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-                s.connect((IP, port))
-                if command[0] == "FILEDESC":
-                    print("got filedesc")
-                    s.send("ACK FILEDESC".encode('utf-8'))
-                    print("afteer ack")
-                    self.stor(s, command[1])
-                    self.parseXML(s, command[1], command[2])
-                elif command[0] == "SEARCH":
-                    self.search(command[1], command[2], s)
-        except socket.error as exc:
-            print("Connection error: " + str(exc))
 
     def stor(self, s, fileName):
-        print("in stor")
-        myString = "STOR "
-        myString = myString + fileName
-        s.send(myString.encode('utf-8'))
         f = open(fileName, "w")
         print("Created file " + fileName)
         line = s.recv(1024).decode('utf-8')
