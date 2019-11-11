@@ -75,4 +75,19 @@ while True:
    else:
        print("Invalid Command")
 
+def connect(server, port, userName, hostName, connSpeed):
+    intPort = int(port)
+    if intPort != 12000:
+        print("INCORRECT PORT")
+        return
+    try:
+        sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        sock.connect((ip, port))
+        print("Connected to " + ip)
+        msg = "CONNECT " + userName + " " + hostName + " " + connSpeed + " " + port
+        sock.send(msg.encode('utf-8'))
+    except:
+        print("ERROR: Invalid IP or port")
+        return
+
 
