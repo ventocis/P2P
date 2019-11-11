@@ -49,7 +49,7 @@ while True:
     #Send ACK command name
     #FILEDESC FileName Username
     #SEARCH DESCR Username
-    #LOCATION XMLFile
+    #LOCATION hostname port fileName connSpeed (repeats this for however many locations)
     #QUIT Username
     #ACK is ACK CONNECT
     #wait for client to send username, hostname, and connection speed
@@ -59,20 +59,23 @@ while True:
     #parse xml file and store descriptions in a table/list
     #wait for user to send a keyword search
 
+
+ #connect(servername, portnum, username, hostname, connspeed)
+ #quit(username)
+ #fileDesc(filename, username)
+ #search(searchString, username)
 while True:
    comm = input("\nINPUT COMMAND: ")
    tokens = comm.split()
-   if tokens[0] == "CONNECT" and len(tokens) == 4:
-       ftp_client.retr(comm, sock)
-   elif tokens[0] == "STOR" and len(tokens) == 2:
-       ftp_client.stor(comm, sock)
-   elif tokens[0] == "LIST" and len(tokens) == 1:
-       ftp_client.listCMD(comm, sock)
-   elif tokens[0] == "QUIT" and len(tokens) == 1:
-       sock.send(comm.encode('utf-8'))
-       print("CLOSING CONNECTION TO SERVER...GOODBYE")
-       sys.exit()
-   else:
+    if tokens[0] == "CONNECT" and len(tokens) == 1:
+       ftp_client.connect(127.0.0.1, 12000, "username", "hostname", "connspeed")
+    elif tokens[0] == "FILEDESC" and len(tokens) == 3:
+       ftp_client.fileDesc(tokens[1], tokens[2])
+    elif tokens[0] == "SEARCH" and len(tokens) == 3:
+       ftp_client.search(tokens[1], tokens[2])
+    elif tokens[0] == "QUIT" and len(tokens) == 2:
+       ftp_client.quit(tokens[1])
+    else:
        print("Invalid Command")
 
 def connect(server, port, userName, hostName, connSpeed):
