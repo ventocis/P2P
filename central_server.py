@@ -110,12 +110,14 @@ class Client(threading.Thread):
         userDict.pop(username, None)
 
     def search(self, srchString, userName, s):
+        #Let the client know that we are running the search so that it knows what to branch to
+        s.send("SEARCH".encode('utf-8'))
         for file in fileList:
             if srchString in file[1] or srchString in file[2]:
                 user = userDict[file[0]]
                 rtrnString = user[0] + " " + user[1] + " " + file[2] + " " + user[2]    #hostname port fileName connSpeed
                 s.send(rtrnString.encode('utf-8'))
-        s.send("ACK LOCATION".encode('utf-8'))
+        s.send("ACK SEARCH".encode('utf-8'))
         
 serv = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 serv.bind((IP, PORT))

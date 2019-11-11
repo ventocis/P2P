@@ -62,6 +62,9 @@ class FileListener(socketserver.BaseRequestHandler):
         if recvStr == "ACK FILEDESC":
             self.fileDesc(command)
         elif command[0] == "STOR":
+        if command[0] == "RETR":
+            self.retr(command)
+        elif command[0] == "SEARCH":
             self.stor(command)
         elif command[0] == "LIST":
             self.list(command)
@@ -71,6 +74,7 @@ class FileListener(socketserver.BaseRequestHandler):
 
 ip = None
 port = None
+ 
 
 def setupSocket(command):
     global PORT
