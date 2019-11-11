@@ -5,21 +5,7 @@ import os
 import ftp_client
 import ftp_server
 
-PORT = 12000
-COUNT = 1
 
-print("Welcome to our FTP Client!")
-print("Commands")
-print("CONNECT [ADDRESS] [PORT]: connects you to a server")
-print("LIST: lists files on server")
-print("RETR [FILENAME]: retrieves file on server")
-print("STOR [FILENAME]: stores file on server")
-print("QUIT: closes connection with server and exits the program")
-print()
-
-ip = None
-port = None
-sock = None
 # Initial Connection to the concurrent server
 
 
@@ -42,6 +28,17 @@ sock = None
  #quit(username)
  #fileDesc(filename, username)
  #search(searchString, username)
+
+print("Welcome to our FTP Client!")
+print("Commands")
+print("CONNECT [ADDRESS] [PORT]: connects you to a server")
+print("LIST: lists files on server")
+print("RETR [FILENAME]: retrieves file on server")
+print("STOR [FILENAME]: stores file on server")
+print("QUIT: closes connection with server and exits the program")
+print()
+
+
 while True:
     comm = input("\nINPUT COMMAND: ")
     tokens = comm.split()

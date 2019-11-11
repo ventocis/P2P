@@ -62,6 +62,7 @@ class FileListener(socketserver.BaseRequestHandler):
         if recvStr == "ACK FILEDESC":
             self.fileDesc(command)
         elif command[0] == "STOR":
+            print("stor")
         if command[0] == "RETR":
             self.retr(command)
         elif command[0] == "SEARCH":
