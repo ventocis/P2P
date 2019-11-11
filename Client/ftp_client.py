@@ -6,7 +6,6 @@ from os.path import isfile, join
 import os
 
 PORT = 12000
-COUNT = 1
 
 class FileListener(socketserver.BaseRequestHandler):
     def retr(self, command):
@@ -62,6 +61,7 @@ class FileListener(socketserver.BaseRequestHandler):
         if recvStr == "ACK FILEDESC":
             self.fileDesc(command)
         elif command[0] == "STOR":
+            print()
         if command[0] == "RETR":
             self.retr(command)
         elif command[0] == "SEARCH":
@@ -74,16 +74,14 @@ class FileListener(socketserver.BaseRequestHandler):
 
 ip = None
 port = None
- 
 
 def setupSocket(command):
     global PORT
-    global COUNT
     global serv
-    PORT = PORT + 2 * COUNT
+    PORT = PORT + 2
+    print(str(PORT))
     command = command + " " + str(PORT)
     serv = socketserver.TCPServer(('127.0.0.1', PORT), FileListener)
-    print(sock)
     sock.send(command.encode('utf-8'))
     serv.handle_request()
 
@@ -102,7 +100,7 @@ def fileDesc(fileName, userName):
     command = "FILEDESC " + fileName + " " + userName
     if os.path.exists(fileName):
         print("File " + fileName + " found")
-        sendCommand(command)
+        setupSocket(command)
     else:
         print("File Not Found")
 

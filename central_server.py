@@ -41,18 +41,16 @@ class Client(threading.Thread):
             #wait for user to send a keyword search
     def connect(self, command):
         try:
-            s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
             port = int(command[4])
             self.storeUsers(command[1], command[2], port, command[3])
-            s.connect((IP, port))
-            s.send("ACK CONNECT".encode('utf-8'))
-            print("sent ack")
             while(True):
                 command = self.request.recv(1024).decode('utf-8').split()
                 if command[0] == "QUIT":
                     self.quit(command[1])
                     return
-                elif command[0] == "FILEDESC":
+                s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+                s.connect((IP, port))
+                if command[0] == "FILEDESC":
                     print("got filedesc")
                     s.send("ACK FILEDESC".encode('utf-8'))
                     print("afteer ack")
@@ -64,17 +62,18 @@ class Client(threading.Thread):
             print("Connection error: " + str(exc))
 
     def stor(self, s, fileName):
-            myString = "STOR "
-            myString = myString + fileName
-            s.send(myString.encode('utf-8'))
-            f = open(fileName, "w")
-            print("Created file " + fileName)
+        print("in stor")
+        myString = "STOR "
+        myString = myString + fileName
+        s.send(myString.encode('utf-8'))
+        f = open(fileName, "w")
+        print("Created file " + fileName)
+        line = s.recv(1024).decode('utf-8')
+        while line:
+            f.write(line)
             line = s.recv(1024).decode('utf-8')
-            while line:
-                f.write(line)
-                line = s.recv(1024).decode('utf-8')
-            f.close()
-            print("File Downloaded")
+        f.close()
+        print("File Downloaded")
 
     def parseXML(self, s, fileName, userName):
         if path.exists(fileName):
