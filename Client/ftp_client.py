@@ -46,12 +46,21 @@ class FileListener(socketserver.BaseRequestHandler):
                 if x != "LIST":
                     print("\t" + x)
 
+    def fileDesc(self, command):        
+        fileName = command[1].strip()
+        with open(fileName, 'r') as fs:
+            for line in fs:
+                self.request.send(line.encode('utf-8'))
+            self.request.close()
+            print("File Uploaded")
+        
+
     def handle(self):
         print("In handle")    
         recvStr = self.request.recv(1024).decode('utf-8')
         command = recvStr.split()
-        if command[0] == "RETR":
-            self.retr(command)
+        if recvStr == "ACK FILEDESC":
+            self.fileDesc(command)
         elif command[0] == "STOR":
             self.stor(command)
         elif command[0] == "LIST":
@@ -62,13 +71,11 @@ class FileListener(socketserver.BaseRequestHandler):
 
 ip = None
 port = None
-sock = None
-serv = None
 
 def setupSocket(command):
     global PORT
     global COUNT
-    global sock
+    global serv
     PORT = PORT + 2 * COUNT
     command = command + " " + str(PORT)
     serv = socketserver.TCPServer(('127.0.0.1', PORT), FileListener)
@@ -77,10 +84,10 @@ def setupSocket(command):
     serv.handle_request()
 
 def sendCommand(command):
-    global sock
-    global serv
     sock.send(command.encode('utf-8'))
+    print(serv)
     serv.handle_request()
+    print("After handle request")
 
 def search(srchString, userName):
     print("In search")
@@ -88,7 +95,6 @@ def search(srchString, userName):
     sendCommand(command)
 
 def fileDesc(fileName, userName):
-    print("In fileDesc")
     command = "FILEDESC " + fileName + " " + userName
     if os.path.exists(fileName):
         print("File " + fileName + " found")

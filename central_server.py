@@ -48,11 +48,14 @@ class Client(threading.Thread):
             s.send("ACK CONNECT".encode('utf-8'))
             print("sent ack")
             while(True):
+                command = self.request.recv(1024).decode('utf-8').split()
                 if command[0] == "QUIT":
                     self.quit(command[1])
                     return
                 elif command[0] == "FILEDESC":
+                    print("got filedesc")
                     s.send("ACK FILEDESC".encode('utf-8'))
+                    print("afteer ack")
                     self.stor(s, command[1])
                     self.parseXML(s, command[1], command[2])
                 elif command[0] == "SEARCH":
