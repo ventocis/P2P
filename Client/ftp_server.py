@@ -24,6 +24,7 @@ class Client(threading.Thread):
             s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
             
             try:
+                print(self.port)
                 s.connect((IP, self.port))
                 if self.command[1] == "LIST":
                     self.list(s)

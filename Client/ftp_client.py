@@ -6,6 +6,9 @@ from os.path import isfile, join
 import os
 
 PORT = 12000
+sock = None
+serv = None
+
 
 class FileListener(socketserver.BaseRequestHandler):
     def retr(self, command):
@@ -75,13 +78,15 @@ class FileListener(socketserver.BaseRequestHandler):
 ip = None
 port = None
 
+#Creates the data socket on a new port, sends the port the data socket is on over the command connection
+#& then waits for the reply from the server on the data socket
 def setupSocket(command):
     global PORT
     global serv
-    # Change the port so that we open the socket on a new port
+    # Change the port so that we open the data socket on a new port
     PORT = PORT + 2
     print(str(PORT))
-    PORT = PORT + 2 * COUNT
+    PORT = PORT + 2
     command = command + " " + str(PORT)
 
     # Create a socket to handle the data connection
@@ -90,9 +95,11 @@ def setupSocket(command):
 
     #send a message to say that we have opened the data connection socket & include the port number
     sock.send(command.encode('utf-8'))
+    print("got here1")
 
     #wait for the reply from the server on the data socket
     serv.handle_request()
+    print("got here")
 
 def sendCommand(command):
     #send a command w the command socket
@@ -102,11 +109,13 @@ def sendCommand(command):
     serv.handle_request()
     print("After handle request")
 
+#Sends the search command to the server
 def search(srchString, userName):
     print("In search")
     command = "SEARCH " + srchString + " " + userName
     sendCommand(command)
 
+#Sends "FILEDESC fileName userName" to the server if the file exists
 def fileDesc(fileName, userName):
     command = "FILEDESC " + fileName + " " + userName
     if os.path.exists(fileName):
@@ -115,14 +124,17 @@ def fileDesc(fileName, userName):
     else:
         print("File Not Found")
 
+#Sends "QUIT username" to the server & closes the server
 def quit(userName):
     command = "QUIT " + userName
     sock.send(command.encode('utf-8'))
     print("CLOSING CONNECTION TO SERVER...GOODBYE")
     sys.exit()
 
+#Establishes the initial control connection
 def connect(server, port, userName, hostName, connSpeed):
     global sock
+    global serv
     print("in connect")
     intPort = int(port)
     if intPort != 12000:
