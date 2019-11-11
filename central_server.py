@@ -28,7 +28,7 @@ class Client(threading.Thread):
             #Send ACK command name
             #FILEDESC FileName Username
             #SEARCH DESCR Username
-            #LOCATION XMLFile
+            #LOCATION list
             #QUIT Username
             #wait for client to send username, hostname, and connection speed
             #store username, hostname, and connection speed in a table/list
@@ -51,7 +51,7 @@ class Client(threading.Thread):
                     self.stor(s, command[1])
                     self.parseXML(s, command[1], command[2])
                 elif command[0] == "SEARCH":
-                    self.search(command[1], command[2])
+                    self.search(command[1], command[2], s)
         except socket.error as exc:
             print("Connection error: " + str(exc))
 
@@ -83,7 +83,7 @@ class Client(threading.Thread):
             s.send("Parse Failed".encode('utf-8'))
 
     def quit(self, userName):
-        #need to delete username and files
+        self.deleteUser(userName)
         print("Client Has Disconnected")
         self.request.close()
 
@@ -101,9 +101,14 @@ class Client(threading.Thread):
                 fileList.remove(file)
         userDict.pop(username, None)
 
-    def search(self, srchString, userName):
+    def search(self, srchString, userName, s):
         for file in fileList:
-            print("In search")
+            if srchString in file[1] or srchString in file[2]:
+                user = userDict[file[0]]
+                rtrnString = user[0] + " " + user[1] + " " + file[2] + " " + user[2]    #hostname port fileName, connSpeed
+                s.send(rtrnString.encode('utf-8'))
+        s.send("ACK LOCATION".encode('utf-8'))
+        
 serv = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 serv.bind((IP, PORT))
 serv.listen(1)
