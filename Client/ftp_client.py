@@ -52,7 +52,7 @@ class FileListener(socketserver.BaseRequestHandler):
         command = recvStr.split()
         if command[0] == "RETR":
             self.retr(command)
-        elif command[0] == "STOR":
+        elif command[0] == "SEARCH":
             self.stor(command)
         elif command[0] == "LIST":
             self.list(command)
@@ -62,13 +62,12 @@ class FileListener(socketserver.BaseRequestHandler):
 
 ip = None
 port = None
-sock = None
-serv = None
+ 
 
 def setupSocket(command):
     global PORT
     global COUNT
-    global sock
+    global serv
     PORT = PORT + 2 * COUNT
     command = command + " " + str(PORT)
     serv = socketserver.TCPServer(('127.0.0.1', PORT), FileListener)
@@ -77,8 +76,6 @@ def setupSocket(command):
     serv.handle_request()
 
 def sendCommand(command):
-    global sock
-    global serv
     sock.send(command.encode('utf-8'))
     serv.handle_request()
 
