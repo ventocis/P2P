@@ -46,7 +46,7 @@ class FileListener(socketserver.BaseRequestHandler):
                 if x != "LIST":
                     print("\t" + x)
 
-    def handle(self, expectedAck):
+    def handle(self):
         print("In handle")    
         recvStr = self.request.recv(1024).decode('utf-8')
         command = recvStr.split()
@@ -56,45 +56,66 @@ class FileListener(socketserver.BaseRequestHandler):
             self.stor(command)
         elif command[0] == "LIST":
             self.list(command)
-        elif recvStr == expectedAck:
-            print("Received Correct ACK: " + expectedAck)
         else:
             print("Skipped it")
         return 
 
-def setupSocket(command, sock, expectedAck):
+ip = None
+port = None
+sock = None
+serv = None
+
+def setupSocket(command):
     global PORT
     global COUNT
+    global sock
     PORT = PORT + 2 * COUNT
     command = command + " " + str(PORT)
     serv = socketserver.TCPServer(('127.0.0.1', PORT), FileListener)
+    print(sock)
     sock.send(command.encode('utf-8'))
-    print("got to handle request")
     serv.handle_request()
 
-def retr(command, sock):
-    print("called this 1")
-    setupSocket(command, sock, "CONNECT 200")
+def sendCommand(command):
+    global sock
+    global serv
+    sock.send(command.encode('utf-8'))
+    serv.handle_request()
 
-def stor(command, sock):
-    tokens = command.split()
-    fileName = tokens[1].strip()
+def search(srchString, userName):
+    print("In search")
+    command = "SEARCH " + srchString + " " + userName
+    sendCommand(command)
+
+def fileDesc(fileName, userName):
+    print("In fileDesc")
+    command = "FILEDESC " + fileName + " " + userName
     if os.path.exists(fileName):
         print("File " + fileName + " found")
-        setupSocket(command, sock)
+        sendCommand(command)
     else:
         print("File Not Found")
 
-def listCMD(command, sock):
-    setupSocket(command, sock, "ACK CONNECT")
+def quit(userName):
+    command = "QUIT " + userName
+    sock.send(command.encode('utf-8'))
+    print("CLOSING CONNECTION TO SERVER...GOODBYE")
+    sys.exit()
 
-def connect(ip, port, name):
+def connect(server, port, userName, hostName, connSpeed):
+    global sock
+    print("in connect")
+    intPort = int(port)
+    if intPort != 12000:
+        print("INCORRECT PORT")
+        return
     try:
         sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        sock.connect((ip,port))
-        stor("STOR filelist.xml", sock)
-        return sock
+        sock.connect((server,intPort))
+        print("Connected to " + server)
+        command = "CONNECT " + userName + " " + hostName + " " + connSpeed
+        setupSocket(command)
     except:
+        print("ERROR: Invalid IP or port")
         return 505
-
 

@@ -21,29 +21,7 @@ ip = None
 port = None
 sock = None
 # Initial Connection to the concurrent server
-while True:
-    comm = input("INPUT COMMAND: ")
-    tokens = comm.split()
-    if tokens[0] == "CONNECT":
-        if len(tokens) != 3:
-            print("INCORRECT NUMBER OF ARGUMENTS")
-            continue
-        ip = tokens[1]
-        port = int(tokens[2])
-        if port != 12000:
-            print("INCORRECT PORT")
-            continue
-        try:
-            sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-            sock.connect((ip, port))
-            print("Connected to " + ip)
-        except:
-            print("ERROR: Invalid IP or port")
-            continue
-        break
-    else:
-        print("MUST CONNECT BEFORE USING OTHER COMMANDS")
-        continue
+
 
     #CONNECT Username Hostname ConnectionSpeed portNumber
     #Send ACK command name
@@ -65,32 +43,18 @@ while True:
  #fileDesc(filename, username)
  #search(searchString, username)
 while True:
-   comm = input("\nINPUT COMMAND: ")
-   tokens = comm.split()
-    if tokens[0] == "CONNECT" and len(tokens) == 1:
-       ftp_client.connect(127.0.0.1, 12000, "username", "hostname", "connspeed")
+    comm = input("\nINPUT COMMAND: ")
+    tokens = comm.split()
+    if tokens[0] == "CONNECT" and len(tokens) == 3:
+        ftp_client.connect("127.0.0.1", 12000, "username", "hostname", "connspeed")
     elif tokens[0] == "FILEDESC" and len(tokens) == 3:
-       ftp_client.fileDesc(tokens[1], tokens[2])
+        ftp_client.fileDesc(tokens[1], tokens[2])
     elif tokens[0] == "SEARCH" and len(tokens) == 3:
-       ftp_client.search(tokens[1], tokens[2])
+        ftp_client.search(tokens[1], tokens[2])
     elif tokens[0] == "QUIT" and len(tokens) == 2:
-       ftp_client.quit(tokens[1])
+        ftp_client.quit(tokens[1])
     else:
-       print("Invalid Command")
+        print("Invalid Command")
 
-def connect(server, port, userName, hostName, connSpeed):
-    intPort = int(port)
-    if intPort != 12000:
-        print("INCORRECT PORT")
-        return
-    try:
-        sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        sock.connect((ip, port))
-        print("Connected to " + ip)
-        msg = "CONNECT " + userName + " " + hostName + " " + connSpeed + " " + port
-        sock.send(msg.encode('utf-8'))
-    except:
-        print("ERROR: Invalid IP or port")
-        return
 
 

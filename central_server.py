@@ -110,7 +110,7 @@ class Client(threading.Thread):
         for file in fileList:
             if srchString in file[1] or srchString in file[2]:
                 user = userDict[file[0]]
-                rtrnString = user[0] + " " + user[1] + " " + file[2] + " " + user[2]    #hostname port fileName, connSpeed
+                rtrnString = user[0] + " " + user[1] + " " + file[2] + " " + user[2]    #hostname port fileName connSpeed
                 s.send(rtrnString.encode('utf-8'))
         s.send("ACK LOCATION".encode('utf-8'))
         
