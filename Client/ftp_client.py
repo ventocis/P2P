@@ -6,21 +6,18 @@ from os.path import isfile, join
 import os
 
 PORT = 12000
-sock = None
-serv = None
-
 
 class FileListener(socketserver.BaseRequestHandler):
 
     def search(self, command):
         self.request.send("searchh".encode('utf-8'))
         stringFromServ = self.request.recv(1024).decode('utf-8')
-
-        while stringFromServ != "EOF SEARCH":
-            print(stringFromServ)
-            stringFromServ = None
-            self.request.send("Next String".encode('utf-8'))
-            stringFromServ = self.request.recv(1024).decode('utf-8')
+        with open('key_search.txt', 'w') as f:
+            while stringFromServ != "EOF SEARCH":
+                f.write(stringFromServ + "\n")
+                stringFromServ = None
+                self.request.send("Next String".encode('utf-8'))
+                stringFromServ = self.request.recv(1024).decode('utf-8')
 
     def fileDesc(self, command):        
         fileName = command[2].strip()
@@ -44,23 +41,23 @@ class FileListener(socketserver.BaseRequestHandler):
 
 def createPort(command):
     global PORT
-    global serv
     PORT = PORT + 2
     print(str(PORT))
 
     # Create a socket to handle the data connection
     serv = socketserver.TCPServer(('127.0.0.1', PORT), FileListener)
+    return serv
 
 #Creates the data socket on a new port, sends the port the data socket is on over the command connection
 #& then waits for the reply from the server on the data socket
-def setupSocket(command):
+def setupSocket(command, sock):
     global PORT
-    global serv
     # Change the port so that we open the data socket on a new port
+    serv = None
     try:
-        createPort(command)
+        serve = createPort(command)
     except:
-        createPort(command)
+        serve = createPort(command)
 
     command = command + " " + str(PORT)
     print(str(command))
@@ -71,42 +68,46 @@ def setupSocket(command):
     serv.handle_request()
 
 #Sends the search command to the server
-def search(srchString, userName):
+def search(srchString, userName, sock):
     print("In search")
     command = "SEARCH " + srchString + " " + userName
-    setupSocket(command)
+    setupSocket(command, sock)
 
 #Sends "FILEDESC fileName userName" to the server if the file exists
-def fileDesc(fileName, userName):
+def fileDesc(fileName, userName, sock):
     command = "FILEDESC " + fileName + " " + userName
     if os.path.exists(fileName):
         print("File " + fileName + " found")
-        setupSocket(command)
+        setupSocket(command, sock)
     else:
         print("File Not Found")
 
 #Sends "QUIT username" to the server & closes the server
-def quit(userName):
+def quitServer(userName, sock):
     command = "QUIT " + userName
     sock.send(command.encode('utf-8'))
     print("CLOSING CONNECTION TO SERVER...GOODBYE")
-    sys.exit()
+    sock.close()
+
+def quit(sock):
+    command = "QUIT"
+    sock.send(command.encode('utf-8'))
+    sock.close()
 
 #Establishes the initial control connection
 def connect(server, port, userName, hostName, connSpeed):
-    global sock
-    global serv
     print("in connect")
     intPort = int(port)
     if intPort != 12000:
         print("INCORRECT PORT")
-        return
+        return 505
     try:
         sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         sock.connect((server,intPort))
         command = "CONNECT " + userName + " " + hostName + " " + connSpeed
         setupSocket(command)
         print("Connected to " + server)
+        return sock
     except:
         print("ERROR: Invalid IP or port")
         return 505

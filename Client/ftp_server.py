@@ -81,9 +81,9 @@ class Client(threading.Thread):
         self.request.close()
 
 
-def beginConn():
+def beginConn(port):
     serv = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    serv.bind((IP, PORT))
+    serv.bind((IP, port))
     serv.listen(1)
 
     while True:

@@ -1,8 +1,40 @@
 import tkinter as tk
 from tkinter import ttk
 from ftp_client import *
+from ftp_server import *
+import os
 
-# def search(keyword):
+name = None
+connSocket = None
+
+def connectToServer(server, port, userName, hostName, connSpeed):
+	global connSocket
+	global name
+    connSocket = connect(server, port, userName, hostName, connSpeed)
+    name = userName
+    if connSocket != 505:
+        fileDesc("filelist.xml", name, connSocket)
+        beginConn(connSocket.getsockname()[1] + 1)
+    else:
+    	tk.messagebox.showerror("Error", "Could not connect to server...")
+
+def searchFiles(srchString):
+	global name
+	global connSocket
+	global sr
+	if name == None or connSocket == None:
+		tk.messagebox.showerror("Error", "Have not connected to server...")
+	search(srchString, name, connSocket)
+	results = None
+	with open('key_search.txt', 'r') as f:
+		results = f.readlines()
+	sr.remove(*sr.get_children())
+	for r in results:
+		info = r.split()
+		p = str(int(info[1])+1)
+		sr.insert("", "end", values = (info[3], info[0] + ":" + p, info[2])
+
+	os.remove("key_search.txt")
 
 root = tk.Tk()
 root.title("GV-NAPSTER Host")
@@ -34,7 +66,7 @@ speeds.config(width = 20)
 speeds.grid(row = 1, column = 5)
 
 # insert command argument when able
-connect_button = tk.Button(connect_frame, text = "Connect")
+connect_button = tk.Button(connect_frame, text = "Connect", command = connectToServer(server_field.get(), port_field.get(), name_field.get(), hostname_field.get(), tkvar.get()))
 connect_button.grid(row = 0, column = 4)
 
 
@@ -51,7 +83,7 @@ tk.Label(search_top, text = "Keyword").grid(row = 0, column = 0)
 keyword_field = tk.Entry(search_top)
 keyword_field.grid(row = 0, column = 1)
 
-search_button = tk.Button(search_top, text = "Search")
+search_button = tk.Button(search_top, text = "Search", command = search(keyword_field.get()))
 search_button.grid(row = 0, column = 2)
 
 #search results
@@ -89,5 +121,8 @@ scroll.pack(side = tk.RIGHT, fill=tk.Y)
 
 commands = tk.Text(ftp_bottom, height = 10, yscrollcommand = scroll.set)
 scroll['command'] = commands.yview
+
+disconnect = tk.Button(ftp_bottom, text = "Disconnect", command = quitServer(name, connSocket))
+disconnect.pack(side = tk.BOTTOM)
 commands.pack(side = tk.LEFT)
 root.mainloop()

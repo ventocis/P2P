@@ -52,6 +52,3 @@ while True:
         ftp_client.quit(tokens[1])
     else:
         print("Invalid Command")
-
-
-
