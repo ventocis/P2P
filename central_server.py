@@ -21,14 +21,16 @@ class Client(threading.Thread):
         while (True):
             try:
                 command = self.request.recv(1024).decode('utf-8').split()
+                print(command)
                 port = int(command[len(command) - 1])
                 if command[0] == "QUIT":
                     self.quit(command[1])
                     return
                 s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+                print("connecting...")
                 s.connect((IP, port))
                 if command[0] == "CONNECT":
-                    self.storeUsers(command[1], command[2], port, command[3])
+                    self.storeUsers(command[1], command[2], self.port, command[3])
                     print("in connected")
                     s.send("ACK CONNECT".encode('utf-8'))
                 elif command[0] == "FILEDESC":
@@ -111,7 +113,7 @@ class Client(threading.Thread):
             if srchString in fileName or srchString in desc:
                 #userDict is a dictionary of arrays of hostname, port number, connSpeed (like fileList)
                 user = userDict.get(file[0])
-                rtrnString = user[0] + " " + str(user[1]) + " " + file[2] + " " + user[2]    #hostname port fileName connSpeed
+                rtrnString = user[0] + " " + str(user[1]) + " " + file[1] + " " + user[2]    #hostname port fileName connSpeed
                 s.send(rtrnString.encode('utf-8'))
                 s.recv(1024).decode('utf-8')
         s.send("EOF SEARCH".encode('utf-8'))

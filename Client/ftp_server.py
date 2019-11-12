@@ -85,6 +85,7 @@ def beginConn(port):
     serv = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     serv.bind((IP, port))
     serv.listen(1)
+    print("starting server...")
 
     while True:
         conn, addr = serv.accept()

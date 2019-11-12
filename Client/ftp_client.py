@@ -28,7 +28,8 @@ class FileListener(socketserver.BaseRequestHandler):
             print("File Uploaded")
         
 
-    def handle(self):  
+    def handle(self):
+        print("Handling...")
         recvStr = self.request.recv(1024).decode('utf-8')
         command = recvStr.split()
         if command[0] == "ACK" and command[1] == "FILEDESC":
@@ -46,26 +47,27 @@ def createPort(command):
 
     # Create a socket to handle the data connection
     serv = socketserver.TCPServer(('127.0.0.1', PORT), FileListener)
-    return serv
+    print(serv)
+    serv.handle_request()
 
 #Creates the data socket on a new port, sends the port the data socket is on over the command connection
 #& then waits for the reply from the server on the data socket
 def setupSocket(command, sock):
     global PORT
     # Change the port so that we open the data socket on a new port
-    serv = None
-    try:
-        serve = createPort(command)
-    except:
-        serve = createPort(command)
-
-    command = command + " " + str(PORT)
+    command = command + " " + str(PORT + 2)
     print(str(command))
     #send a message to say that we have opened the data connection socket & include the port number
-    sock.send(command.encode('utf-8'))
+    sock.send(str(command).encode('utf-8'))
 
-    #wait for the reply from the server on the data socket
-    serv.handle_request()
+    serv = None
+    try:
+        print("creating port")
+        createPort(command)
+    except:
+        print("error creating port")
+    print(sock)
+     #wait for the reply from the server on the data socket
 
 #Sends the search command to the server
 def search(srchString, userName, sock):
@@ -105,7 +107,8 @@ def connect(server, port, userName, hostName, connSpeed):
         sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         sock.connect((server,intPort))
         command = "CONNECT " + userName + " " + hostName + " " + connSpeed
-        setupSocket(command)
+        print("setting up socket...")
+        setupSocket(command, sock)
         print("Connected to " + server)
         return sock
     except:
