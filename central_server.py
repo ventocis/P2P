@@ -39,6 +39,7 @@ class Client(threading.Thread):
                 elif command[0] == "SEARCH":
                     s.send(("ACK SEARCH").encode('utf-8'))
                     self.search(command[1], command[2], s)
+                s.close()
             except socket.error as exc:
                 print("Connection error: " + str(exc))
                     
