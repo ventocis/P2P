@@ -34,10 +34,10 @@ class Client(threading.Thread):
                 elif command[0] == "FILEDESC":
                     fileName = command[1]
                     s.send(("ACK FILEDESC " + fileName).encode('utf-8'))
-                    print("afteer ack")
                     self.stor(s, command[1])
                     self.parseXML(s, command[1], command[2])
                 elif command[0] == "SEARCH":
+                    s.send(("ACK SEARCH").encode('utf-8'))
                     self.search(command[1], command[2], s)
             except socket.error as exc:
                 print("Connection error: " + str(exc))
@@ -100,13 +100,20 @@ class Client(threading.Thread):
 
     def search(self, srchString, userName, s):
         #Let the client know that we are running the search so that it knows what to branch to
-        s.send("SEARCH".encode('utf-8'))
+        s.recv(1024).decode('utf-8')
+
+        #Goes through each file that is stores for all users
+        #fileList is an array of arrays formatted as [[username, filename, descr] [username...]]
         for file in fileList:
-            if srchString in file[1] or srchString in file[2]:
-                user = userDict[file[0]]
-                rtrnString = user[0] + " " + user[1] + " " + file[2] + " " + user[2]    #hostname port fileName connSpeed
+            fileName = file[1]
+            desc = file[2]
+            if srchString in fileName or srchString in desc:
+                #userDict is a dictionary of arrays of hostname, port number, connSpeed (like fileList)
+                user = userDict.get(file[0])
+                rtrnString = user[0] + " " + str(user[1]) + " " + file[2] + " " + user[2]    #hostname port fileName connSpeed
                 s.send(rtrnString.encode('utf-8'))
-        s.send("ACK SEARCH".encode('utf-8'))
+                s.recv(1024).decode('utf-8')
+        s.send("EOF SEARCH".encode('utf-8'))
         
 serv = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 serv.bind((IP, PORT))
