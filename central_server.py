@@ -7,6 +7,7 @@ from os import listdir, path
 
 IP = '127.0.0.1'
 PORT = 12000
+SERVER_PORTS = 18397
 userDict = {}
 fileList = []
 
@@ -18,22 +19,25 @@ class Client(threading.Thread):
         super(Client, self).__init__()
 
     def run(self):
+        global SERVER_PORTS
         while (True):
             try:
                 command = self.request.recv(1024).decode('utf-8').split()
                 print(command)
-                port = int(command[len(command) - 1])
                 if command[0] == "QUIT":
                     self.quit(command[1])
                     return
-                s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+                port = int(command[len(command) - 1])
                 print("connecting...")
-                s.connect((IP, port))
                 if command[0] == "CONNECT":
-                    self.storeUsers(command[1], command[2], self.port, command[3])
+                    self.storeUsers(command[1], command[2], SERVER_PORTS, command[3])
                     print("in connected")
-                    s.send("ACK CONNECT".encode('utf-8'))
-                elif command[0] == "FILEDESC":
+                    self.request.send(("ACK CONNECT " + str(SERVER_PORTS)).encode('utf-8'))
+                    SERVER_PORTS = SERVER_PORTS + 2
+                    continue
+                s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+                s.connect((IP, port))
+                if command[0] == "FILEDESC":
                     fileName = command[1]
                     s.send(("ACK FILEDESC " + fileName).encode('utf-8'))
                     self.stor(s, command[1])
@@ -96,9 +100,8 @@ class Client(threading.Thread):
         fileList.append(fileInfo)
         
     def deleteUser(self, username):
-        for file in fileList:
-            if file[0] == username:
-                fileList.remove(file)
+        global fileList
+        fileList = [f for f in fileList if f[0] != username]
         userDict.pop(username, None)
 
     def search(self, srchString, userName, s):

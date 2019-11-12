@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<filelist>
+	<file>
+		<name>sampleFile.txt</name>
+		<description>It's a sample file for testing</description>
+	</file>
+	<file>
+		<name>WOW.txt</name>
+		<description>Wow, this is likely the best file in the world.</description>
+	</file>
+	<file>
+		<name>hotdogs.txt</name>
+		<description>This is the ultimate test file. Has hot dogs.</description>
+	</file>
+</filelist>
